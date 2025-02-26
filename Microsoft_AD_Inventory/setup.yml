@@ -1,0 +1,63 @@
+controller_credential_types:
+  - name: Microsoft AD Inventory
+    kind: cloud
+    inputs:
+      fields:
+        - id: MICROSOFT_AD_LDAP_USERNAME
+          type: string
+          label: Username
+        - id: MICROSOFT_AD_LDAP_PASSWORD
+          type: string
+          label: Password
+          secret: true
+        - id: MICROSOFT_AD_LDAP_SERVER
+          type: string
+          label: AD Server
+      required:
+        - MICROSOFT_AD_LDAP_USERNAME
+        - MICROSOFT_AD_LDAP_PASSWORD
+        - MICROSOFT_AD_LDAP_SERVER
+    injectors:
+      env:
+        MICROSOFT_AD_LDAP_SERVER: !unsafe '{{ MICROSOFT_AD_LDAP_SERVER }}'
+        MICROSOFT_AD_LDAP_PASSWORD: !unsafe '{{ MICROSOFT_AD_LDAP_PASSWORD }}'
+        MICROSOFT_AD_LDAP_USERNAME: !unsafe '{{ MICROSOFT_AD_LDAP_USERNAME }}'
+
+
+controller_credentials:
+  - name: Microsoft AD Inventory
+    credential_type: Microsoft AD Inventory
+    organization: Default
+    state: exists
+    inputs:
+      MICROSOFT_AD_LDAP_USERNAME: REPLACEME
+      MICROSOFT_AD_LDAP_PASSWORD: REPLACEME
+      MICROSOFT_AD_LDAP_SERVER: REPLACEME
+
+
+controller_execution_environments:
+  - name: Microsoft Inventory Execution Environment
+    image: quay.io/truch/microsoft:1.0
+  - name: Product Demos EE
+    image: quay.io/ansible-product-demos/apd-ee-25:latest
+
+
+controller_projects:
+  - name: Microsoft AD
+    organization: Default
+    scm_type: git
+    scm_url: https://github.com/taruch/ansible-microsoft.git
+    update_project: true
+    wait: false
+    controller_request_timeout: 20
+    controller_configuration_async_retries: 40
+    default_environment: Product Demos EE
+
+
+controller_inventory_sources:
+  - name: Microsoft Inventory
+    inventory: Demo Inventory
+    source: scm
+    source_project: Microsoft AD
+    source_path: microsoft.ad.ldap.yml
+    credential: Microsoft Ad Inventory
